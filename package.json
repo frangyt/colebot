@@ -1,0 +1,96 @@
+{
+  "name": "muse",
+  "version": "0.1.0",
+  "description": "🎧 a self-hosted Discord music bot that doesn't suck ",
+  "main": "dist/index.js",
+  "repository": "git@github.com:codetheweb/muse.git",
+  "author": "Max Isom <hi@maxisom.me>",
+  "license": "MIT",
+  "private": true,
+  "types": "dts/types",
+  "files": [
+    "dist",
+    "dts"
+  ],
+  "scripts": {
+    "lint": "eslint 'src/**/*.ts'",
+    "lint-fix": "eslint 'src/**/*.ts' --fix",
+    "clean": "rm -rf dist dts",
+    "test": "npm run lint",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepack": "npm run clean && npm run build",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "docker-publish": "docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t codetheweb/muse:latest --push ."
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.35",
+    "@types/debug": "^4.1.5",
+    "@types/fluent-ffmpeg": "^2.1.17",
+    "@types/fs-capacitor": "^2.0.0",
+    "@types/node": "^14.14.41",
+    "@types/node-emoji": "^1.8.1",
+    "@types/spotify-web-api-node": "^5.0.2",
+    "@types/validator": "^13.1.4",
+    "@types/ws": "^7.4.4",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.26.1",
+    "eslint": "^7.28.0",
+    "eslint-config-xo": "^0.35.0",
+    "eslint-config-xo-typescript": "^0.36.0",
+    "husky": "^4.3.8",
+    "nodemon": "^2.0.7",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.3.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "xo",
+      "xo-typescript/space"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "new-cap": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars-experimental": "error",
+      "@typescript-eslint/prefer-readonly-parameter-types": "off"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test && yarn build"
+    }
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "array-shuffle": "^2.0.0",
+    "debug": "^4.3.1",
+    "delay": "^5.0.0",
+    "discord.js": "^12.5.3",
+    "dotenv": "^8.5.1",
+    "ffmpeg-static": "^4.4.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs-capacitor": "^6.2.0",
+    "get-youtube-id": "^1.0.1",
+    "got": "^11.8.2",
+    "hasha": "^5.2.2",
+    "inversify": "^5.1.1",
+    "iso8601-duration": "^1.3.0",
+    "make-dir": "^3.1.0",
+    "node-emoji": "^1.10.0",
+    "p-event": "^4.2.0",
+    "p-limit": "^3.1.0",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^5.22.4",
+    "sequelize-typescript": "^1.1.0",
+    "spotify-uri": "^2.2.0",
+    "spotify-web-api-node": "^5.0.2",
+    "sqlite3": "^5.0.2",
+    "youtube.ts": "^0.2.0",
+    "ytdl-core": "^4.9.1"
+  }
+}
