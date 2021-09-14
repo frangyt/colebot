@@ -1,3 +1,8 @@
+Por enquanto é só uma cópia do Muse mesmo, já configurei a parte do .env se alguém da colegada tiver vendo isso e precisar é só pedir
+
+
+
+
 <p align="center">
   <img width="250" height="250" src="https://raw.githubusercontent.com/codetheweb/muse/master/.github/logo.png">
 </p>
