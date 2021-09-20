@@ -1,6 +1,5 @@
-Por enquanto é só uma cópia do Muse mesmo, já configurei a parte do .env se alguém da colegada tiver vendo isso e precisar é só pedir
-
-
+Features adicionadas pela colegada:
+* Adicionado o comando de Loop.
 
 
 <p align="center">
