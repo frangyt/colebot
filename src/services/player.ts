@@ -37,6 +37,7 @@ export default class {
   private nowPlaying: QueuedSong | null = null;
   private playPositionInterval: NodeJS.Timeout | undefined;
   private lastSongURL = '';
+  private looping = false;
 
   private positionInSeconds = 0;
 
@@ -89,6 +90,10 @@ export default class {
     this.startTrackingPosition(positionSeconds);
 
     this.status = STATUS.PLAYING;
+  }
+
+  islooping():boolean{
+    return this.looping;
   }
 
   async forwardSeek(positionSeconds: number): Promise<void> {
@@ -168,8 +173,13 @@ export default class {
       if (this.getCurrent() && this.status !== STATUS.PAUSED) {
         await this.play();
       } else {
-        this.status = STATUS.PAUSED;
-        this.disconnect();
+        if (this.looping){
+          this.queuePosition = 0;
+          await this.play();
+        }else{
+          this.status = STATUS.PAUSED;
+          this.disconnect();
+        }
       }
     } catch (error: unknown) {
       this.queuePosition--;
@@ -177,13 +187,13 @@ export default class {
     }
   }
 
-  manualForward(skip: number): void {
-    if ((this.queuePosition + skip - 1) < this.queue.length) {
+  manualForward(skip: number): void {    
+    if ((this.queuePosition + skip - 1) < this.queue.length) {      
       this.queuePosition += skip;
       this.positionInSeconds = 0;
       this.stopTrackingPosition();
     } else {
-      throw new Error('No songs in queue to forward to.');
+        throw new Error('No songs in queue to forward to.');              
     }
   }
 
@@ -243,6 +253,14 @@ export default class {
     this.queue = [...this.queue.slice(0, this.queuePosition + 1), ...shuffledSongs];
   }
 
+  loop():void {
+    if (this.looping){
+      this.looping = false;
+    }else{
+      this.looping = true;
+    }
+  }
+
   clear(): void {
     const newQueue = [];
 
@@ -263,6 +281,10 @@ export default class {
 
   queueSize(): number {
     return this.getQueue().length;
+  }
+
+  canLoop(): boolean{
+    return this.queue.length > 1;
   }
 
   isQueueEmpty(): boolean {
