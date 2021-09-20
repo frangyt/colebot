@@ -29,6 +29,7 @@ import Config from './commands/config';
 import Disconnect from './commands/disconnect';
 import ForwardSeek from './commands/fseek';
 import Help from './commands/help';
+import Loop from './commands/loop';
 import Pause from './commands/pause';
 import Play from './commands/play';
 import QueueCommad from './commands/queue';
@@ -58,6 +59,7 @@ container.bind<NaturalLanguage>(TYPES.Services.NaturalLanguage).to(NaturalLangua
   Disconnect,
   ForwardSeek,
   Help,
+  Loop,
   Pause,
   Play,
   QueueCommad,
