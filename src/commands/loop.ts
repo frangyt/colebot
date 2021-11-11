@@ -24,7 +24,7 @@ export default class implements Command {
   public async execute(msg: Message, _: string []): Promise<void> {
     const player = this.playerManager.get(msg.guild!.id);
 
-    if (!player.canLoop()) {
+    if (player.isQueueEmpty()) {
       await msg.channel.send(errorMsg('not enough songs to loop'));
       return;
     }

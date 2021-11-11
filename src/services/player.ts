@@ -211,6 +211,14 @@ export default class {
     }
   }
 
+  async restart(): Promise<void>{
+    this.positionInSeconds = 0;
+    this.stopTrackingPosition();
+    if (this.status !== STATUS.PAUSED) {
+      await this.play();
+    }
+  }
+
   getCurrent(): QueuedSong | null {
     if (this.queue[this.queuePosition]) {
       return this.queue[this.queuePosition];
@@ -220,7 +228,7 @@ export default class {
   }
 
   getQueue(): QueuedSong[] {
-    return this.queue.slice(this.queuePosition + 1);
+    return this.queue;
   }
 
   add(song: QueuedSong, {immediate = false} = {}): void {
@@ -281,10 +289,6 @@ export default class {
 
   queueSize(): number {
     return this.getQueue().length;
-  }
-
-  canLoop(): boolean{
-    return this.queue.length > 1;
   }
 
   isQueueEmpty(): boolean {

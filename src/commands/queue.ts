@@ -42,6 +42,8 @@ export default class implements Command {
         return;
       }
 
+      // pega o numero da musica atual, musicaAtual/Itens por pagina, 
+
       const embed = new MessageEmbed();
 
       embed.setTitle(currentlyPlaying.title);
