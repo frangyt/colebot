@@ -10,7 +10,7 @@ export default class implements Command {
   public name = 'shuffle';
   public aliases = [];
   public examples = [
-    ['shuffle', 'shuffles the current queue']
+    ['shuffle', 'embaralha a fila']
   ];
 
   public requiresVC = true;
@@ -25,12 +25,12 @@ export default class implements Command {
     const player = this.playerManager.get(msg.guild!.id);
 
     if (player.isQueueEmpty()) {
-      await msg.channel.send(errorMsg('not enough songs to shuffle'));
+      await msg.channel.send(errorMsg('fila vazia'));
       return;
     }
 
     player.shuffle();
 
-    await msg.channel.send('shuffled');
+    await msg.channel.send('tudo junto e misturado');
   }
 }

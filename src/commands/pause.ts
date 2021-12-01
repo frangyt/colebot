@@ -11,7 +11,7 @@ export default class implements Command {
   public name = 'pause';
   public aliases = [];
   public examples = [
-    ['pause', 'pauses currently playing song']
+    ['pause', 'pausa a música tocando']
   ];
 
   public requiresVC = true;
@@ -26,11 +26,11 @@ export default class implements Command {
     const player = this.playerManager.get(msg.guild!.id);
 
     if (player.status !== STATUS.PLAYING) {
-      await msg.channel.send(errorMsg('not currently playing'));
+      await msg.channel.send(errorMsg('tem nada tocando'));
       return;
     }
 
     player.pause();
-    await msg.channel.send('the stop-and-go light is now red');
+    await msg.channel.send('Paraaaaa Para Para');
   }
 }

@@ -10,7 +10,7 @@ export default class implements Command {
   public name = 'loop';
   public aliases = ['l'];
   public examples = [
-    ['loop', 'loops the current queue']
+    ['loop', 'deixa a fila em loop']
   ];
 
   public requiresVC = true;
@@ -25,7 +25,7 @@ export default class implements Command {
     const player = this.playerManager.get(msg.guild!.id);
 
     if (player.isQueueEmpty()) {
-      await msg.channel.send(errorMsg('not enough songs to loop'));
+      await msg.channel.send(errorMsg('não tem musica na fila'));
       return;
     }
 

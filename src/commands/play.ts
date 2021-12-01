@@ -15,15 +15,15 @@ export default class implements Command {
   public name = 'play';
   public aliases = ['p'];
   public examples = [
-    ['play', 'resume paused playback'],
-    ['play https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'plays a YouTube video'],
-    ['play cool music', 'plays the first search result for "cool music" from YouTube'],
-    ['play https://www.youtube.com/watch?list=PLi9drqWffJ9FWBo7ZVOiaVy0UQQEm4IbP', 'adds the playlist to the queue'],
-    ['play https://open.spotify.com/track/3ebXMykcMXOcLeJ9xZ17XH?si=tioqSuyMRBWxhThhAW51Ig', 'plays a song from Spotify'],
-    ['play https://open.spotify.com/album/5dv1oLETxdsYOkS2Sic00z?si=bDa7PaloRx6bMIfKdnvYQw', 'adds all songs from album to the queue'],
-    ['play https://open.spotify.com/playlist/37i9dQZF1DX94qaYRnkufr?si=r2fOVL_QQjGxFM5MWb84Xw', 'adds all songs from playlist to the queue'],
-    ['play cool music immediate', 'adds the first search result for "cool music" to the front of the queue'],
-    ['play cool music i', 'adds the first search result for "cool music" to the front of the queue']
+    ['play', 'resume a música atual'],
+    ['play https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'toca um video do youtube'],
+    ['play chatuba de mesquita', 'toca o primeiro resultado para "chatuba de mesquita" do YouTube'],
+    ['play https://www.youtube.com/watch?list=PLi9drqWffJ9FWBo7ZVOiaVy0UQQEm4IbP', 'adiciona a playlist na fila'],
+    ['play https://open.spotify.com/track/3ebXMykcMXOcLeJ9xZ17XH?si=tioqSuyMRBWxhThhAW51Ig', 'toca uma musica do Spotify'],
+    ['play https://open.spotify.com/album/5dv1oLETxdsYOkS2Sic00z?si=bDa7PaloRx6bMIfKdnvYQw', 'adiciona todo o album na fila'],
+    ['play https://open.spotify.com/playlist/37i9dQZF1DX94qaYRnkufr?si=r2fOVL_QQjGxFM5MWb84Xw', 'adiciona a playlist na fila'],
+    ['play chatuba de mesquita immediate', 'adiciona o primeiro resultado de "chatuba de mesquita" na proxima posição da fila'],
+    ['play chatuba de mesquita i', 'adiciona o primeiro resultado de "chatuba de mesquita" na proxima posição da fila']
   ];
 
   public requiresVC = true;
@@ -49,20 +49,20 @@ export default class implements Command {
 
     if (args.length === 0) {
       if (player.status === STATUS.PLAYING) {
-        await res.stop(errorMsg('already playing, give me a song name'));
+        await res.stop(errorMsg('já ta tocando, fala uma música aí'));
         return;
       }
 
       // Must be resuming play
       if (!wasPlayingSong) {
-        await res.stop(errorMsg('nothing to play'));
+        await res.stop(errorMsg('tem nada para tocar'));
         return;
       }
 
       await player.connect(targetVoiceChannel);
       await player.play();
 
-      await res.stop('the stop-and-go light is now green');
+      await res.stop('tocando uma aqui');
       return;
     }
 
@@ -89,7 +89,7 @@ export default class implements Command {
           if (song) {
             newSongs.push(song);
           } else {
-            await res.stop(errorMsg('that doesn\'t exist'));
+            await res.stop(errorMsg('num existe'));
             return;
           }
         }
@@ -97,18 +97,18 @@ export default class implements Command {
         const [convertedSongs, nSongsNotFound, totalSongs] = await this.getSongs.spotifySource(args[0]);
 
         if (totalSongs > 50) {
-          extraMsg = 'a random sample of 50 songs was taken';
+          extraMsg = 'peguei umas 50 aleatórias dai';
         }
 
         if (totalSongs > 50 && nSongsNotFound !== 0) {
-          extraMsg += ' and ';
+          extraMsg += ' e ';
         }
 
         if (nSongsNotFound !== 0) {
           if (nSongsNotFound === 1) {
-            extraMsg += '1 song was not found';
+            extraMsg += 'não encontrei 1 música';
           } else {
-            extraMsg += `${nSongsNotFound.toString()} songs were not found`;
+            extraMsg += `não encontrei ${nSongsNotFound.toString()} músicas`;
           }
         }
 
@@ -123,13 +123,13 @@ export default class implements Command {
       if (song) {
         newSongs.push(song);
       } else {
-        await res.stop(errorMsg('that doesn\'t exist'));
+        await res.stop(errorMsg('num existe'));
         return;
       }
     }
 
     if (newSongs.length === 0) {
-      await res.stop(errorMsg('no songs found'));
+      await res.stop(errorMsg('encontrei nada'));
       return;
     }
 
@@ -142,9 +142,9 @@ export default class implements Command {
     }
 
     if (newSongs.length === 1) {
-      await res.stop(`u betcha, **${firstSong.title}** added to the${addToFrontOfQueue ? ' front of the' : ''} queue${extraMsg}`);
+      await res.stop(`opa, **${firstSong.title}** adicionada ${addToFrontOfQueue ? ' no começo da fila' : ''} queue${extraMsg}`);
     } else {
-      await res.stop(`u betcha, **${firstSong.title}** and ${newSongs.length - 1} other songs were added to the queue${extraMsg}`);
+      await res.stop(`opa, **${firstSong.title}** e ${newSongs.length - 1} mais umas músicas foram adicionadas ${extraMsg}`);
     }
 
     if (queueOldSize === 0 && !wasPlayingSong) {

@@ -9,10 +9,10 @@ export default class implements Command {
   public name = 'shortcuts';
   public aliases = [];
   public examples = [
-    ['shortcuts', 'show all shortcuts'],
-    ['shortcuts set s skip', 'aliases `s` to `skip`'],
-    ['shortcuts set party play https://www.youtube.com/watch?v=zK6oOJ1wz8k', 'aliases `party` to a specific play command'],
-    ['shortcuts delete party', 'removes the `party` shortcut']
+    ['shortcuts', 'mostra todos os atalhos'],
+    ['shortcuts set s skip', 'define `s` para `skip`'],
+    ['shortcuts set festinha play https://www.youtube.com/watch?v=zK6oOJ1wz8k', 'aliases `festinha` para um comando especifico'],
+    ['shortcuts delete festinha', 'remove o atalho `festinha`']
   ];
 
   public async execute(msg: Message, args: string []): Promise<void> {
@@ -21,7 +21,7 @@ export default class implements Command {
       const shortcuts = await Shortcut.findAll({where: {guildId: msg.guild!.id}});
 
       if (shortcuts.length === 0) {
-        await msg.channel.send('no shortcuts exist');
+        await msg.channel.send('não existe atalhos');
         return;
       }
 
@@ -56,15 +56,15 @@ export default class implements Command {
 
           if (shortcut) {
             if (shortcut.authorId !== msg.author.id && msg.author.id !== msg.guild!.owner!.id) {
-              await msg.channel.send(errorMsg('you do\'nt have permission to do that'));
+              await msg.channel.send(errorMsg('acesso negado'));
               return;
             }
 
             await shortcut.update(newShortcut);
-            await msg.channel.send('shortcut updated');
+            await msg.channel.send('atalho atualizado');
           } else {
             await Shortcut.create(newShortcut);
-            await msg.channel.send('shortcut created');
+            await msg.channel.send('atalho criado');
           }
 
           break;
@@ -75,25 +75,25 @@ export default class implements Command {
           const shortcut = await Shortcut.findOne({where: {guildId: msg.guild!.id, shortcut: shortcutName}});
 
           if (!shortcut) {
-            await msg.channel.send(errorMsg('shortcut doesn\'t exist'));
+            await msg.channel.send(errorMsg('atalho não existe'));
             return;
           }
 
           // Check permissions
           if (shortcut.authorId !== msg.author.id && msg.author.id !== msg.guild!.owner!.id) {
-            await msg.channel.send(errorMsg('you don\'t have permission to do that'));
+            await msg.channel.send(errorMsg('acesso negado'));
             return;
           }
 
           await shortcut.destroy();
 
-          await msg.channel.send('shortcut deleted');
+          await msg.channel.send('atalho removido');
 
           break;
         }
 
         default: {
-          await msg.channel.send(errorMsg('unknown command'));
+          await msg.channel.send(errorMsg('comando desconhecido'));
         }
       }
     }

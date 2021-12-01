@@ -15,7 +15,7 @@ export default class implements Command {
   public name = 'currentsong';
   public aliases = ['cs'];
   public examples = [
-    ['currentSong', 'shows current song']   
+    ['currentSong', 'mostra a música atual']   
   ];
 
   private readonly playerManager: PlayerManager;
@@ -84,7 +84,7 @@ export default class implements Command {
             break;   
           case '⏸️':
             if (player.status !== STATUS.PLAYING) {
-              msg.channel.send(errorMsg('not currently playing'));
+              msg.channel.send(errorMsg('não está tocando'));
               return;
             }        
             player.pause();
@@ -106,7 +106,7 @@ export default class implements Command {
       });
 
     } else {
-      await msg.channel.send('queue empty');
+      await msg.channel.send('fila vazia');
     }
   }
 
@@ -120,7 +120,7 @@ export default class implements Command {
     try {
       player.back();
     } catch (_: unknown) {
-      msg.channel.send(errorMsg('no song to go back to'));
+      msg.channel.send(errorMsg('não tem música anterior'));
     }
     this.execute(msg);
   }

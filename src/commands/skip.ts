@@ -11,8 +11,8 @@ export default class implements Command {
   public name = 'skip';
   public aliases = ['s'];
   public examples = [
-    ['skip', 'skips the current song'],
-    ['skip 2', 'skips the next 2 songs']
+    ['skip', 'pula a música atual'],
+    ['skip 2', 'pula as duas proximas músicas']
   ];
 
   public requiresVC = true;
@@ -40,9 +40,9 @@ export default class implements Command {
       await loader.start();
       await player.forward(numToSkip);
 
-      await loader.stop('keep \'er movin\'');
+      await loader.stop('bora que bora');
     } catch (_: unknown) {
-      await loader.stop(errorMsg('no song to skip to'));
+      await loader.stop(errorMsg('num tem mais música'));
     }
   }
 }

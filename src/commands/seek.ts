@@ -12,9 +12,9 @@ export default class implements Command {
   public name = 'seek';
   public aliases = [];
   public examples = [
-    ['seek 10', 'seeks to 10 seconds from beginning of song'],
-    ['seek 1:30', 'seeks to 1 minute and 30 seconds from beginning of song'],
-    ['seek 1:00:00', 'seeks to 1 hour from beginning of song']
+    ['seek 10', 'pula para 10 segundos da musica, partindo do inicio'],
+    ['seek 1:30', 'pula para 1:30 da musica'],
+    ['seek 1:00:00', 'pula para 1:00:00 da musica']
   ];
 
   public requiresVC = true;
@@ -31,12 +31,12 @@ export default class implements Command {
     const currentSong = player.getCurrent();
 
     if (!currentSong) {
-      await msg.channel.send(errorMsg('nothing is playing'));
+      await msg.channel.send(errorMsg('tem nada tocando'));
       return;
     }
 
     if (currentSong.isLive) {
-      await msg.channel.send(errorMsg('can\'t seek in a livestream'));
+      await msg.channel.send(errorMsg('não da para pular em live'));
       return;
     }
 
@@ -51,7 +51,7 @@ export default class implements Command {
     }
 
     if (seekTime > currentSong.length) {
-      await msg.channel.send(errorMsg('can\'t seek past the end of the song'));
+      await msg.channel.send(errorMsg('musica não é tão grande assim'));
       return;
     }
 
