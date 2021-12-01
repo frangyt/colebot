@@ -1,5 +1,6 @@
 Features adicionadas pela colegada:
 * Adicionado o comando de Loop.
+* Adicionado o comando currentSong
 
 
 <p align="center">
