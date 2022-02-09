@@ -23,7 +23,7 @@ export default class {
     this.spotify = spotify;
   }
 
-  async youtubeVideoSearch(query: string): Promise<QueuedSong|null> {
+  async youtubeVideoSearch(query: string): Promise<QueuedSong | null> {
     try {
       const {items: [video]} = await this.youtube.videos.search({q: query, maxResults: 1, type: 'video'});
 
@@ -33,7 +33,7 @@ export default class {
     }
   }
 
-  async youtubeVideo(url: string): Promise<QueuedSong|null> {
+  async youtubeVideo(url: string): Promise<QueuedSong | null> {
     try {
       const videoDetails = await this.youtube.videos.get(cleanUrl(url));
 

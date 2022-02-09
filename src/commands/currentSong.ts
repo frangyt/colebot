@@ -1,4 +1,4 @@
-import {Message, MessageEmbed, CollectorFilter} from 'discord.js';
+import {Message, MessageEmbed} from 'discord.js';
 import {TYPES} from '../types';
 import {inject, injectable} from 'inversify';
 import PlayerManager from '../managers/player';
@@ -8,14 +8,13 @@ import getProgressBar from '../utils/get-progress-bar';
 import {prettyTime} from '../utils/time';
 import getYouTubeID from 'get-youtube-id';
 import errorMsg from '../utils/error-msg';
-import { getMostPopularVoiceChannel } from '../utils/channels';
 
 @injectable()
 export default class implements Command {
   public name = 'currentsong';
   public aliases = ['cs'];
   public examples = [
-    ['currentSong', 'mostra a música atual']   
+    ['currentSong', 'mostra a música atual']
   ];
 
   private readonly playerManager: PlayerManager;
@@ -32,7 +31,6 @@ export default class implements Command {
     const currentlyPlaying = player.getCurrent();
 
     if (currentlyPlaying) {
-      
       const embed = new MessageEmbed();
 
       embed.setTitle(currentlyPlaying.title);
@@ -43,7 +41,7 @@ export default class implements Command {
       description += getProgressBar(20, player.getPosition() / currentlyPlaying.length);
       description += ' ';
       description += `\`[${prettyTime(player.getPosition())}/${currentlyPlaying.isLive ? 'live' : prettyTime(currentlyPlaying.length)}]\``;
-      description += ' 🔉';      
+      description += ' 🔉';
 
       embed.setDescription(description);
 
@@ -53,10 +51,9 @@ export default class implements Command {
         footer += ` (${currentlyPlaying.playlist.title})`;
       }
 
-      embed.setFooter(footer);      
+      embed.setFooter(footer);
 
-      const res = await msg.channel.send(embed);        
-
+      const res = await msg.channel.send(embed);
 
       await res.react('⏮️');
       await res.react('⏸️');
@@ -64,64 +61,65 @@ export default class implements Command {
       await res.react('▶️');
       await res.react('⏭️');
 
-      
-      
-      const filter = (reaction:any) => {
-        return reaction.emoji.name === '⏭️' || 
+      const filter = (reaction: any) => {
+        return reaction.emoji.name === '⏭️' ||
                reaction.emoji.name === '⏸️' ||
-               reaction.emoji.name === '↩️' || 
-               reaction.emoji.name === '⏮️' || 
-               reaction.emoji.name === '▶️' ;
+               reaction.emoji.name === '↩️' ||
+               reaction.emoji.name === '⏮️' ||
+               reaction.emoji.name === '▶️';
       };
 
-      const collector = res.createReactionCollector( filter, { time: 15000 });
+      const collector = res.createReactionCollector(filter, {time: 15000});
 
-      collector.on('collect', (reaction) => {
-        switch (reaction.emoji.name){
+      collector.on('collect', reaction => {
+        switch (reaction.emoji.name) {
           case '⏭️':
-            this.skip(msgAux);     
-            collector.stop();    
-            break;   
+            this.skip(msgAux);
+            collector.stop();
+            break;
           case '⏸️':
             if (player.status !== STATUS.PLAYING) {
-              msg.channel.send(errorMsg('não está tocando'));
+              void msg.channel.send(errorMsg('não está tocando'));
               return;
-            }        
+            }
+
             player.pause();
             break;
           case '⏮️':
             this.unskip(msgAux);
             collector.stop();
             break;
-          case '▶️':           
-            if (player.status == STATUS.PLAYING) {
-              msg.channel.send(errorMsg('A Musica já esta playando'));
+          case '▶️':
+            if (player.status === STATUS.PLAYING) {
+              void msg.channel.send(errorMsg('A Musica já esta playando'));
               return;
             }
-            player.play();            
+
+            void player.play();
             break;
           default:
-            console.log("emoji invalido");
+            console.log('emoji invalido');
         }
       });
-
     } else {
       await msg.channel.send('fila vazia');
     }
   }
 
-  private skip(msg: Message){
+  private skip(msg: Message) {
     const player = this.playerManager.get(msg.guild!.id);
-    player.forward(1);
-    this.execute(msg);
+    void player.forward(1);
+    void this.execute(msg);
   }
-  private unskip(msg: Message){    
+
+  private unskip(msg: Message) {
     const player = this.playerManager.get(msg.guild!.id);
     try {
-      player.back();
+      void player.back();
     } catch (_: unknown) {
-      msg.channel.send(errorMsg('não tem música anterior'));
+      void msg.channel.send(errorMsg('não tem música anterior'));
     }
-    this.execute(msg);
+
+    void this.execute(msg);
   }
 }

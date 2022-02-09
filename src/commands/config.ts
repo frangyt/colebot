@@ -31,7 +31,7 @@ export default class implements Command {
     const setting = args[0];
 
     if (args.length !== 2) {
-      await msg.channel.send(errorMsg('incorrect number of arguments')); //traduzir
+      await msg.channel.send(errorMsg('incorrect number of arguments')); // Traduzir
       return;
     }
 

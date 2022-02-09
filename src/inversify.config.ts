@@ -34,6 +34,7 @@ import CurrentSong from './commands/currentSong';
 import Pause from './commands/pause';
 import Play from './commands/play';
 import QueueCommad from './commands/queue';
+import Remove from './commands/remove';
 import Seek from './commands/seek';
 import Shortcuts from './commands/shortcuts';
 import Shuffle from './commands/shuffle';
@@ -65,6 +66,7 @@ container.bind<NaturalLanguage>(TYPES.Services.NaturalLanguage).to(NaturalLangua
   Pause,
   Play,
   QueueCommad,
+  Remove,
   Seek,
   Shortcuts,
   Shuffle,
