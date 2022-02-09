@@ -92,7 +92,7 @@ export default class {
     this.status = STATUS.PLAYING;
   }
 
-  islooping():boolean{
+  islooping(): boolean {
     return this.looping;
   }
 
@@ -172,14 +172,12 @@ export default class {
     try {
       if (this.getCurrent() && this.status !== STATUS.PAUSED) {
         await this.play();
+      } else if (this.looping) {
+        this.queuePosition = 0;
+        await this.play();
       } else {
-        if (this.looping){
-          this.queuePosition = 0;
-          await this.play();
-        }else{
-          this.status = STATUS.PAUSED;
-          this.disconnect();
-        }
+        this.status = STATUS.PAUSED;
+        this.disconnect();
       }
     } catch (error: unknown) {
       this.queuePosition--;
@@ -187,13 +185,31 @@ export default class {
     }
   }
 
-  manualForward(skip: number): void {    
-    if ((this.queuePosition + skip - 1) < this.queue.length) {      
+  async remove(pos: number): Promise<void> {
+    if (pos === 0) {
+      this.removeCurrent();
+      this.positionInSeconds = 0;
+      this.stopTrackingPosition();
+      if (this.getCurrent() && this.status !== STATUS.PAUSED) {
+        await this.play();
+      } else {
+        this.status = STATUS.PAUSED;
+        this.disconnect();
+      }
+    } else if (this.queue.length < pos) {
+      throw new Error('Não existe essa posição na fila');
+    } else {
+      this.queue.splice(pos - 1, 1);
+    }
+  }
+
+  manualForward(skip: number): void {
+    if ((this.queuePosition + skip - 1) < this.queue.length) {
       this.queuePosition += skip;
       this.positionInSeconds = 0;
       this.stopTrackingPosition();
     } else {
-        throw new Error('No songs in queue to forward to.');              
+      throw new Error('No songs in queue to forward to.');
     }
   }
 
@@ -211,7 +227,7 @@ export default class {
     }
   }
 
-  async restart(): Promise<void>{
+  async restart(): Promise<void> {
     this.positionInSeconds = 0;
     this.stopTrackingPosition();
     if (this.status !== STATUS.PAUSED) {
@@ -261,10 +277,10 @@ export default class {
     this.queue = [...this.queue.slice(0, this.queuePosition + 1), ...shuffledSongs];
   }
 
-  loop():void {
-    if (this.looping){
+  loop(): void {
+    if (this.looping) {
       this.looping = false;
-    }else{
+    } else {
       this.looping = true;
     }
   }

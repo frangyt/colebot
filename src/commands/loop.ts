@@ -31,9 +31,9 @@ export default class implements Command {
 
     player.loop();
 
-    if (player.islooping()){
+    if (player.islooping()) {
       await msg.channel.send('loop ativado');
-    }else{
+    } else {
       await msg.channel.send('loop desativado');
     }
   }

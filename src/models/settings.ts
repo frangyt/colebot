@@ -4,15 +4,15 @@ import {Table, Column, PrimaryKey, Model, Default} from 'sequelize-typescript';
 export default class Settings extends Model<Settings> {
   @PrimaryKey
   @Column
-  guildId!: string;
+    guildId!: string;
 
   @Column
-  prefix!: string;
+    prefix!: string;
 
   @Column
-  channel!: string;
+    channel!: string;
 
   @Default(false)
   @Column
-  finishedSetup!: boolean;
+    finishedSetup!: boolean;
 }

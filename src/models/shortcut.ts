@@ -5,19 +5,19 @@ export default class Shortcut extends Model<Shortcut> {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id!: number;
+    id!: number;
 
   @Column
   @Index
-  guildId!: string;
+    guildId!: string;
 
   @Column
-  authorId!: string;
+    authorId!: string;
 
   @Column
   @Index
-  shortcut!: string;
+    shortcut!: string;
 
   @Column
-  command!: string;
+    command!: string;
 }
