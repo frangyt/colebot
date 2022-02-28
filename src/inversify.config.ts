@@ -1,90 +1,91 @@
 import 'reflect-metadata';
 import {Container} from 'inversify';
-import {TYPES} from './types';
-import Bot from './bot';
-import {Client} from 'discord.js';
-import YouTube from 'youtube.ts';
-import Spotify from 'spotify-web-api-node';
-import {
-  DISCORD_TOKEN,
-  DISCORD_CLIENT_ID,
-  YOUTUBE_API_KEY,
-  SPOTIFY_CLIENT_ID,
-  SPOTIFY_CLIENT_SECRET,
-  DATA_DIR,
-  CACHE_DIR
-} from './utils/config';
+import {TYPES} from './types.js';
+import Bot from './bot.js';
+import {Client, Intents} from 'discord.js';
+import ConfigProvider from './services/config.js';
 
 // Managers
-import PlayerManager from './managers/player';
+import PlayerManager from './managers/player.js';
 
-// Helpers
-import GetSongs from './services/get-songs';
-import NaturalLanguage from './services/natural-language-commands';
+// Services
+import AddQueryToQueue from './services/add-query-to-queue.js';
+import GetSongs from './services/get-songs.js';
 
 // Comands
 import Command from './commands';
-import Clear from './commands/clear';
-import Config from './commands/config';
-import Disconnect from './commands/disconnect';
-import ForwardSeek from './commands/fseek';
-import Help from './commands/help';
-import Loop from './commands/loop';
-import CurrentSong from './commands/currentSong';
-import Pause from './commands/pause';
-import Play from './commands/play';
-import QueueCommad from './commands/queue';
-import Remove from './commands/remove';
-import Seek from './commands/seek';
-import Shortcuts from './commands/shortcuts';
-import Shuffle from './commands/shuffle';
-import Skip from './commands/skip';
-import Unskip from './commands/unskip';
+import Clear from './commands/clear.js';
+import Config from './commands/config.js';
+import Disconnect from './commands/disconnect.js';
+import Favorites from './commands/favorites.js';
+import ForwardSeek from './commands/fseek.js';
+import Pause from './commands/pause.js';
+import Play from './commands/play.js';
+import QueueCommand from './commands/queue.js';
+import Remove from './commands/remove.js';
+import Seek from './commands/seek.js';
+import Shuffle from './commands/shuffle.js';
+import Skip from './commands/skip.js';
+import Stop from './commands/stop.js';
+import Unskip from './commands/unskip.js';
+import ThirdParty from './services/third-party.js';
+import FileCacheProvider from './services/file-cache.js';
+import KeyValueCacheProvider from './services/key-value-cache.js';
+import Help from './commands/help.js';
+import Loop from './commands/loop.js';
+import CurrentSong from './commands/currentSong.js';
 
-let container = new Container();
+const container = new Container();
+
+// Intents
+const intents = new Intents();
+intents.add(Intents.FLAGS.GUILDS); // To listen for guildCreate event
+intents.add(Intents.FLAGS.GUILD_MESSAGES); // To listen for messages (messageCreate event)
+intents.add(Intents.FLAGS.DIRECT_MESSAGE_REACTIONS); // To listen for message reactions (messageReactionAdd event)
+intents.add(Intents.FLAGS.DIRECT_MESSAGES); // To receive the prefix message
+intents.add(Intents.FLAGS.GUILD_VOICE_STATES); // To listen for voice state changes (voiceStateUpdate event)
 
 // Bot
 container.bind<Bot>(TYPES.Bot).to(Bot).inSingletonScope();
-container.bind<Client>(TYPES.Client).toConstantValue(new Client());
+container.bind<Client>(TYPES.Client).toConstantValue(new Client({intents}));
 
 // Managers
 container.bind<PlayerManager>(TYPES.Managers.Player).to(PlayerManager).inSingletonScope();
 
-// Helpers
+// Services
 container.bind<GetSongs>(TYPES.Services.GetSongs).to(GetSongs).inSingletonScope();
-container.bind<NaturalLanguage>(TYPES.Services.NaturalLanguage).to(NaturalLanguage).inSingletonScope();
+container.bind<AddQueryToQueue>(TYPES.Services.AddQueryToQueue).to(AddQueryToQueue).inSingletonScope();
 
 // Commands
 [
   Clear,
   Config,
   Disconnect,
+  Favorites,
   ForwardSeek,
+  CurrentSong,
   Help,
   Loop,
-  CurrentSong,
   Pause,
   Play,
-  QueueCommad,
+  QueueCommand,
   Remove,
   Seek,
-  Shortcuts,
   Shuffle,
   Skip,
-  Unskip
+  Stop,
+  Unskip,
 ].forEach(command => {
   container.bind<Command>(TYPES.Command).to(command).inSingletonScope();
 });
 
 // Config values
-container.bind<string>(TYPES.Config.DISCORD_TOKEN).toConstantValue(DISCORD_TOKEN);
-container.bind<string>(TYPES.Config.DISCORD_CLIENT_ID).toConstantValue(DISCORD_CLIENT_ID);
-container.bind<string>(TYPES.Config.YOUTUBE_API_KEY).toConstantValue(YOUTUBE_API_KEY);
-container.bind<string>(TYPES.Config.DATA_DIR).toConstantValue(DATA_DIR);
-container.bind<string>(TYPES.Config.CACHE_DIR).toConstantValue(CACHE_DIR);
+container.bind(TYPES.Config).toConstantValue(new ConfigProvider());
 
 // Static libraries
-container.bind<YouTube>(TYPES.Lib.YouTube).toConstantValue(new YouTube(YOUTUBE_API_KEY));
-container.bind<Spotify>(TYPES.Lib.Spotify).toConstantValue(new Spotify({clientId: SPOTIFY_CLIENT_ID, clientSecret: SPOTIFY_CLIENT_SECRET}));
+container.bind(TYPES.ThirdParty).to(ThirdParty);
+
+container.bind(TYPES.FileCache).to(FileCacheProvider);
+container.bind(TYPES.KeyValueCache).to(KeyValueCacheProvider);
 
 export default container;

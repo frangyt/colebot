@@ -1,18 +1,16 @@
-import {Message} from 'discord.js';
-import {TYPES} from '../types';
+import {CommandInteraction} from 'discord.js';
+import {SlashCommandBuilder} from '@discordjs/builders';
+import {TYPES} from '../types.js';
 import {inject, injectable} from 'inversify';
-import PlayerManager from '../managers/player';
-import {STATUS} from '../services/player';
-import errorMsg from '../utils/error-msg';
+import PlayerManager from '../managers/player.js';
+import {STATUS} from '../services/player.js';
 import Command from '.';
 
 @injectable()
 export default class implements Command {
-  public name = 'pause';
-  public aliases = [];
-  public examples = [
-    ['pause', 'pausa a música tocando']
-  ];
+  public readonly slashCommand = new SlashCommandBuilder()
+    .setName('pause')
+    .setDescription('pause the current song');
 
   public requiresVC = true;
 
@@ -22,15 +20,14 @@ export default class implements Command {
     this.playerManager = playerManager;
   }
 
-  public async execute(msg: Message, _: string []): Promise<void> {
-    const player = this.playerManager.get(msg.guild!.id);
+  public async execute(interaction: CommandInteraction) {
+    const player = this.playerManager.get(interaction.guild!.id);
 
     if (player.status !== STATUS.PLAYING) {
-      await msg.channel.send(errorMsg('tem nada tocando'));
-      return;
+      throw new Error('not currently playing');
     }
 
     player.pause();
-    await msg.channel.send('Paraaaaa Para Para');
+    await interaction.reply('the stop-and-go light is now red');
   }
 }

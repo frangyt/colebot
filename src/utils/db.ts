@@ -1,12 +1,4 @@
-import {Sequelize} from 'sequelize-typescript';
-import path from 'path';
-import {DATA_DIR} from '../utils/config';
-import {Settings, Shortcut} from '../models';
+import Prisma from '@prisma/client';
 
-export const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  database: 'muse',
-  storage: path.join(DATA_DIR, 'db.sqlite'),
-  models: [Settings, Shortcut],
-  logging: false
-});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+export const prisma = new Prisma.PrismaClient();

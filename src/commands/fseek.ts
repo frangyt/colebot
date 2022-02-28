@@ -1,18 +1,20 @@
-import {Message, TextChannel} from 'discord.js';
-import {TYPES} from '../types';
+import {CommandInteraction} from 'discord.js';
+import {SlashCommandBuilder} from '@discordjs/builders';
+import {TYPES} from '../types.js';
 import {inject, injectable} from 'inversify';
-import PlayerManager from '../managers/player';
-import LoadingMessage from '../utils/loading-message';
-import errorMsg from '../utils/error-msg';
+import PlayerManager from '../managers/player.js';
 import Command from '.';
+import {prettyTime} from '../utils/time.js';
 
 @injectable()
 export default class implements Command {
-  public name = 'fseek';
-  public aliases = [];
-  public examples = [
-    ['fseek 10', 'pula a música atual em 10 seconds']
-  ];
+  public readonly slashCommand = new SlashCommandBuilder()
+    .setName('fseek')
+    .setDescription('seek forward in the current song')
+    .addNumberOption(option => option
+      .setName('seconds')
+      .setDescription('the number of seconds to skip forward')
+      .setRequired(true));
 
   public requiresVC = true;
 
@@ -22,38 +24,35 @@ export default class implements Command {
     this.playerManager = playerManager;
   }
 
-  public async execute(msg: Message, args: string []): Promise<void> {
-    const player = this.playerManager.get(msg.guild!.id);
+  public async execute(interaction: CommandInteraction): Promise<void> {
+    const player = this.playerManager.get(interaction.guild!.id);
 
     const currentSong = player.getCurrent();
 
     if (!currentSong) {
-      await msg.channel.send(errorMsg('tem nada tocando'));
-      return;
+      throw new Error('nothing is playing');
     }
 
     if (currentSong.isLive) {
-      await msg.channel.send(errorMsg('não da para pular uma live'));
-      return;
+      throw new Error('can\'t seek in a livestream');
     }
 
-    const seekTime = parseInt(args[0], 10);
+    const seekTime = interaction.options.getNumber('seconds');
 
+    if (!seekTime) {
+      throw new Error('missing number of seconds to seek');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     if (seekTime + player.getPosition() > currentSong.length) {
-      await msg.channel.send(errorMsg('não da para avançar para depois do final'));
-      return;
+      throw new Error('can\'t seek past the end of the song');
     }
 
-    const loading = new LoadingMessage(msg.channel as TextChannel);
+    await Promise.all([
+      player.forwardSeek(seekTime),
+      interaction.deferReply()
+    ]);
 
-    await loading.start();
-
-    try {
-      await player.forwardSeek(seekTime);
-
-      await loading.stop();
-    } catch (error: unknown) {
-      await loading.stop(errorMsg(error as Error));
-    }
+    await interaction.editReply(`👍 seeked to ${prettyTime(player.getPosition())}`);
   }
 }

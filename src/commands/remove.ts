@@ -1,21 +1,24 @@
-import {Message, TextChannel} from 'discord.js';
-import {TYPES} from '../types';
+import {CommandInteraction} from 'discord.js';
 import {inject, injectable} from 'inversify';
-import PlayerManager from '../managers/player';
+import {TYPES} from '../types.js';
+import PlayerManager from '../managers/player.js';
 import Command from '.';
-import LoadingMessage from '../utils/loading-message';
-import errorMsg from '../utils/error-msg';
+import {SlashCommandBuilder} from '@discordjs/builders';
 
 @injectable()
 export default class implements Command {
-  public name = 'remove';
-  public aliases = ['r'];
-  public examples = [
-    ['remove', 'remove a música atual da fila'],
-    ['remove 2', 'remove a segunda música da fila']
-  ];
-
-  public requiresVC = true;
+  public readonly slashCommand = new SlashCommandBuilder()
+    .setName('remove')
+    .setDescription('remove songs from the queue')
+    .addIntegerOption(option =>
+      option.setName('position')
+        .setDescription('position of the song to remove [default: 1]')
+        .setRequired(false)
+    )
+    .addIntegerOption(option =>
+      option.setName('range')
+        .setDescription('number of songs to remove [default: 1]')
+        .setRequired(false));
 
   private readonly playerManager: PlayerManager;
 
@@ -23,30 +26,22 @@ export default class implements Command {
     this.playerManager = playerManager;
   }
 
-  public async execute(msg: Message, args: string []): Promise<void> {
-    let numPos = 0;
+  public async execute(interaction: CommandInteraction): Promise<void> {
+    const player = this.playerManager.get(interaction.guild!.id);
 
-    if (args.length === 1) {
-      if (!Number.isNaN(parseInt(args[0], 10))) {
-        numPos = parseInt(args[0], 10);
-      }
+    const position = interaction.options.getInteger('position') ?? 1;
+    const range = interaction.options.getInteger('range') ?? 1;
+
+    if (position < 1) {
+      throw new Error('position must be at least 1');
     }
 
-    if (numPos === 1) {
-      numPos = 0;
+    if (range < 1) {
+      throw new Error('range must be at least 1');
     }
 
-    const player = this.playerManager.get(msg.guild!.id);
+    player.removeFromQueue(position, range);
 
-    const loader = new LoadingMessage(msg.channel as TextChannel);
-
-    try {
-      await loader.start();
-      await player.remove(numPos);
-
-      await loader.stop('essa bosta foi removida');
-    } catch (_: unknown) {
-      await loader.stop(errorMsg('Não existe essa posição na fila'));
-    }
+    await interaction.reply(':wastebasket: removed');
   }
 }

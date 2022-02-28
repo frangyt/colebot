@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import {Message} from 'discord.js';
 import {injectable} from 'inversify';
 import Command from '.';
@@ -46,7 +47,7 @@ export default class implements Command {
         content += `**${command.name}** (${aliases}):\n`;
       }
 
-      command.examples.forEach(example => {
+      command.examples.forEach((example: any[]) => {
         content += `- \`${prefix}${example[0]}\`: ${example[1]}\n`;
       });
 

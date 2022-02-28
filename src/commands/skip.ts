@@ -1,19 +1,20 @@
-import {Message, TextChannel} from 'discord.js';
-import {TYPES} from '../types';
+import {CommandInteraction} from 'discord.js';
+import {TYPES} from '../types.js';
 import {inject, injectable} from 'inversify';
-import PlayerManager from '../managers/player';
+import PlayerManager from '../managers/player.js';
 import Command from '.';
-import LoadingMessage from '../utils/loading-message';
-import errorMsg from '../utils/error-msg';
+import {SlashCommandBuilder} from '@discordjs/builders';
+import {buildPlayingMessageEmbed} from '../utils/build-embed.js';
 
 @injectable()
 export default class implements Command {
-  public name = 'skip';
-  public aliases = ['s'];
-  public examples = [
-    ['skip', 'pula a música atual'],
-    ['skip 2', 'pula as duas proximas músicas']
-  ];
+  public readonly slashCommand = new SlashCommandBuilder()
+    .setName('skip')
+    .setDescription('skip the next songs')
+    .addIntegerOption(option => option
+      .setName('number')
+      .setDescription('number of songs to skip [default: 1]')
+      .setRequired(false));
 
   public requiresVC = true;
 
@@ -23,26 +24,23 @@ export default class implements Command {
     this.playerManager = playerManager;
   }
 
-  public async execute(msg: Message, args: string []): Promise<void> {
-    let numToSkip = 1;
+  public async execute(interaction: CommandInteraction): Promise<void> {
+    const numToSkip = interaction.options.getInteger('skip') ?? 1;
 
-    if (args.length === 1) {
-      if (!Number.isNaN(parseInt(args[0], 10))) {
-        numToSkip = parseInt(args[0], 10);
-      }
+    if (numToSkip < 1) {
+      throw new Error('invalid number of songs to skip');
     }
 
-    const player = this.playerManager.get(msg.guild!.id);
-
-    const loader = new LoadingMessage(msg.channel as TextChannel);
+    const player = this.playerManager.get(interaction.guild!.id);
 
     try {
-      await loader.start();
       await player.forward(numToSkip);
-
-      await loader.stop('bora que bora');
+      await interaction.reply({
+        content: 'keep \'er movin\'',
+        embeds: player.getCurrent() ? [buildPlayingMessageEmbed(player)] : []
+      });
     } catch (_: unknown) {
-      await loader.stop(errorMsg('num tem mais música'));
+      throw new Error('no song to skip to');
     }
   }
 }

@@ -1,24 +1,20 @@
-import {Message, MessageEmbed} from 'discord.js';
-import {TYPES} from '../types';
+import {CommandInteraction} from 'discord.js';
+import {SlashCommandBuilder} from '@discordjs/builders';
 import {inject, injectable} from 'inversify';
-import PlayerManager from '../managers/player';
-import {STATUS} from '../services/player';
+import {TYPES} from '../types.js';
+import PlayerManager from '../managers/player.js';
 import Command from '.';
-import getProgressBar from '../utils/get-progress-bar';
-import errorMsg from '../utils/error-msg';
-import {prettyTime} from '../utils/time';
-import getYouTubeID from 'get-youtube-id';
-
-const PAGE_SIZE = 10;
+import {buildQueueEmbed} from '../utils/build-embed.js';
 
 @injectable()
 export default class implements Command {
-  public name = 'queue';
-  public aliases = ['q'];
-  public examples = [
-    ['queue', 'mostra a fila atual'],
-    ['queue 2', 'mostra a segunda página da fila']
-  ];
+  public readonly slashCommand = new SlashCommandBuilder()
+    .setName('queue')
+    .setDescription('show the current queue')
+    .addIntegerOption(option => option
+      .setName('page')
+      .setDescription('page of queue to show [default: 1]')
+      .setRequired(false));
 
   private readonly playerManager: PlayerManager;
 
@@ -26,59 +22,11 @@ export default class implements Command {
     this.playerManager = playerManager;
   }
 
-  public async execute(msg: Message, args: string []): Promise<void> {
-    const player = this.playerManager.get(msg.guild!.id);
+  public async execute(interaction: CommandInteraction) {
+    const player = this.playerManager.get(interaction.guild!.id);
 
-    const currentlyPlaying = player.getCurrent();
+    const embed = buildQueueEmbed(player, interaction.options.getInteger('page') ?? 1);
 
-    if (currentlyPlaying) {
-      const queueSize = player.queueSize();
-      const queuePage = args[0] ? parseInt(args[0], 10) : 1;
-
-      const maxQueuePage = Math.ceil((queueSize + 1) / PAGE_SIZE);
-
-      if (queuePage > maxQueuePage) {
-        await msg.channel.send(errorMsg('calma que não é tão grande'));
-        return;
-      }
-
-      // Pega o numero da musica atual, musicaAtual/Itens por pagina,
-
-      const embed = new MessageEmbed();
-
-      embed.setTitle(currentlyPlaying.title);
-      embed.setURL(`https://www.youtube.com/watch?v=${currentlyPlaying.url.length === 11 ? currentlyPlaying.url : getYouTubeID(currentlyPlaying.url) ?? ''}`);
-
-      let description = player.status === STATUS.PLAYING ? '⏹️' : '▶️';
-      description += ' ';
-      description += getProgressBar(20, player.getPosition() / currentlyPlaying.length);
-      description += ' ';
-      description += `\`[${prettyTime(player.getPosition())}/${currentlyPlaying.isLive ? 'live' : prettyTime(currentlyPlaying.length)}]\``;
-      description += ' 🔉';
-      description += player.isQueueEmpty() ? '' : '\n\n**Proxima:**';
-
-      embed.setDescription(description);
-
-      let footer = `Source: ${currentlyPlaying.artist}`;
-
-      if (currentlyPlaying.playlist) {
-        footer += ` (${currentlyPlaying.playlist.title})`;
-      }
-
-      embed.setFooter(footer);
-
-      const queuePageBegin = (queuePage - 1) * PAGE_SIZE;
-      const queuePageEnd = queuePageBegin + PAGE_SIZE;
-
-      player.getQueue().slice(queuePageBegin, queuePageEnd).forEach((song, i) => {
-        embed.addField(`${(i + 1 + queuePageBegin).toString()}/${queueSize.toString()}`, song.title, false);
-      });
-
-      embed.addField('Page', `${queuePage} de ${maxQueuePage}`, false);
-
-      await msg.channel.send(embed);
-    } else {
-      await msg.channel.send('fila vazia');
-    }
+    await interaction.reply({embeds: [embed]});
   }
 }
